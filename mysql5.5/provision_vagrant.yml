@@ -17,27 +17,18 @@
     - apt: pkg=zip update_cache=no state=latest
     - apt: pkg=unzip update_cache=no state=latest
     - apt: pkg=vim update_cache=no state=latest
-    - apt: pkg=libaio1 update_cache=no state=latest
+    - apt: pkg=mysql-server update_cache=no state=latest
     - pip: name=MySQL-python
-
-    - command: mkdir -p /tmp/mysql
-    - get_url: url="http://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.17-debian6.0-x86_64.deb" dest=/tmp/mysql/mysql-5.6.17-debian6.0-x86_64.deb
-    - command: chdir=/tmp/mysql sudo dpkg -i mysql-5.6.17-debian6.0-x86_64.deb
-    - user: name=mysql group=mysql home=/home/mysql shell=/bin/bash state=present
-
-    - copy: src=./conf/my.cnf dest=/etc/mysql/my.cnf owner=root group=root mode=0644
-    - command: sudo chown -R mysql:mysql /opt/mysql/server-5.6
-    - command: sudo install -o mysql -g mysql -d /data/mysql
-    - command: sudo /opt/mysql/server-5.6/scripts/mysql_install_db --user=mysql --datadir=/data/mysql --no-default
-
-    - command: sudo cp /opt/mysql/server-5.6/support-files/mysql.server /etc/init.d/mysqld
-    - command: sudo update-rc.d mysqld defaults
 
     - name: copy .my.cnf file with root password credentials
       template: src=./conf/dot.my.cnf dest=/root/.my.cnf owner=root mode=0600
 
-    - name: be sure mysqld is running and enabled
-      service: name=mysqld state=running enabled=yes
+    - name: copy my.cnf file for server settings
+      template: src=./conf/my.cnf dest=/etc/mysql/my.cnf owner=root mode=0600
+
+
+    - name: be sure mysql is running and enabled
+      service: name=mysql state=running enabled=yes
 
     - name: delete anonymous MySQL server user
       action: mysql_user user="" state="absent"
