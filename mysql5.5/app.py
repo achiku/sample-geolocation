@@ -3,7 +3,8 @@
 import argparse
 from math import radians, cos
 import MySQLdb
-# http://www.mysqlperformanceblog.com/2013/10/21/using-the-new-spatial-functions-in-mysql-5-6-for-geo-enabled-applications/
+# http://gihyo.jp/dev/feature/01/location-based-services/0005
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -31,7 +32,7 @@ if __name__ == '__main__':
 
     con = MySQLdb.connect(
         db='geoloc', user='geoloc', passwd='geoloc',
-        charset='utf8', host='192.168.33.59')
+        charset='utf8', host='192.168.33.58')
 
     cursor = con.cursor()
     sql = '''
@@ -40,11 +41,10 @@ if __name__ == '__main__':
         ,astext(geo)
         ,name
     FROM place
-    WHERE ST_WITHIN(geo, ENVELOPE(LINESTRING(POINT(%s, %s), POINT(%s, %s))))
-    ORDER BY ST_DISTANCE(POINT(%s, %s), geo) LIMIT 10;
+    WHERE MBRContains(LINESTRING(POINT(%s, %s), POINT(%s, %s)), geo);
     '''
     cursor.execute(
-        sql, [rlon1, rlat1, rlon2, rlat2, current_longitude, current_latitude])
+        sql, [rlon1, rlat1, rlon2, rlat2])
     result = cursor.fetchall()
     for row in result:
         print row[0], row[1], row[2].encode('utf-8')
