@@ -36,15 +36,32 @@ if __name__ == '__main__':
 
     cursor = con.cursor()
     sql = '''
+    -- for mysql 5.5
     SELECT
         id
-        ,astext(geo)
         ,name
+        ,ASTEXT(geo)
     FROM place
-    WHERE MBRContains(LINESTRING(POINT(%s, %s), POINT(%s, %s)), geo);
+    WHERE
+    MBRContains(
+      LINESTRING(
+        POINT(%s, %s),
+        POINT(%s, %s)
+      ), geo
+    )
+    ORDER BY GLength(
+      GeomFromText(
+        CONCAT(
+          LINESTRING(
+            POINT(%s, %s),
+            POINT(Y(geo), X(geo))
+          )
+        )
+      )
+    ) LIMIT 3;
     '''
     cursor.execute(
-        sql, [rlon1, rlat1, rlon2, rlat2])
+        sql, [rlon1, rlat1, rlon2, rlat2, current_longitude, current_latitude])
     result = cursor.fetchall()
     for row in result:
         print row[0], row[1], row[2].encode('utf-8')

@@ -35,12 +35,22 @@ if __name__ == '__main__':
 
     cursor = con.cursor()
     sql = '''
+    -- for mysql 5.6
     SELECT
-        id
-        ,astext(geo)
-        ,name
+      id
+      ,ASTEXT(geo)
+      ,name
     FROM place
-    WHERE ST_WITHIN(geo, ENVELOPE(LINESTRING(POINT(%s, %s), POINT(%s, %s))))
+    WHERE
+    ST_WITHIN(
+      geo,
+      ENVELOPE(
+        LINESTRING(
+          POINT(%s, %s),
+          POINT(%s, %s)
+        )
+      )
+    )
     ORDER BY ST_DISTANCE(POINT(%s, %s), geo) LIMIT 10;
     '''
     cursor.execute(
